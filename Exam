@@ -1,0 +1,72 @@
+SIMPLE PIPELINE 
+## 1. Create a Freestyle Job
+A Freestyle job is the simplest way to run a script or build a project.
+
+1.  Open Jenkins and click **New Item** on the left sidebar.
+2.  Enter a name (e.g., `My-Freestyle-Job`) and select **Freestyle project**. Click **OK**.
+3.  Scroll down to the **Build Steps** section.
+4.  Click **Add build step** > **Execute shell**.
+5.  Enter a simple command like: `echo "Building my CDAC project..."`.
+6.  Click **Save** and then **Build Now** to test it.
+
+---
+
+## 2. Connect Jenkins with GitHub
+To pull code, Jenkins needs to know where your repository is.
+
+1.  In your Freestyle job, go to **Configure**.
+2.  Under **Source Code Management**, select **Git**.
+3.  Enter your **Repository URL** (e.g., `[https://github.com/your-username/repo-name.git](https://github.com/your-username/repo-name.git)`).
+4.  If the repo is private, click **Add** > **Jenkins** under **Credentials** to provide your GitHub Personal Access Token (PAT).
+5.  Specify the branch (usually `*/main` or `*/master`).
+
+---
+
+## 3. Configure a Build Trigger (Poll SCM)
+This tells Jenkins to check GitHub for changes on a schedule.
+
+1.  In the **Build Triggers** section, check **Poll SCM**.
+2.  In the **Schedule** box, enter: `H/5 * * * *` (This checks for changes every 5 minutes).
+    > **Note:** If you prefer a **Webhook**, you must go to your GitHub Repo **Settings > Webhooks**, add your Jenkins URL (`http://your-ip:8080/github-webhook/`), and check **GitHub hook trigger for GITScm polling** in Jenkins.
+
+---
+
+## 4. Create a Pipeline using a Jenkinsfile
+Pipelines are "Configuration as Code." This is the industry standard you'll use in DevOps.
+
+### Step A: The Jenkinsfile
+Create a file named `Jenkinsfile` (no extension) in the root of your GitHub repository with this content:
+
+```groovy
+pipeline {
+    agent any 
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code from GitHub...'
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Compiling code...'
+                sh 'ls -l'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Running Unit Tests...'
+            }
+        }
+    }
+}
+```
+
+### Step B: The Jenkins Job
+1.  In Jenkins, click **New Item** > **Pipeline**. Name it `My-Pipeline`.
+2.  Scroll to the **Pipeline** section.
+3.  Under **Definition**, select **Pipeline script from SCM**.
+4.  Choose **Git** and enter your **Repository URL**.
+5.  Ensure **Script Path** says `Jenkinsfile`.
+6.  Click **Save** and **Build Now**.
+
+---
